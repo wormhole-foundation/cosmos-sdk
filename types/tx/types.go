@@ -62,6 +62,13 @@ func (t *Tx) ValidateBasic() error {
 		)
 	}
 
+	if fee.Amount.IsAnyNil() {
+		return sdkerrors.Wrapf(
+			sdkerrors.ErrInsufficientFee,
+			"invalid fee provided: null",
+		)
+	}
+
 	if fee.Amount.IsAnyNegative() {
 		return sdkerrors.Wrapf(
 			sdkerrors.ErrInsufficientFee,
@@ -111,10 +118,7 @@ func (t *Tx) GetSigners() []sdk.AccAddress {
 	// ensure any specified fee payer is included in the required signers (at the end)
 	feePayer := t.AuthInfo.Fee.Payer
 	if feePayer != "" && !seen[feePayer] {
-		payerAddr, err := sdk.AccAddressFromBech32(feePayer)
-		if err != nil {
-			panic(err)
-		}
+		payerAddr := sdk.MustAccAddressFromBech32(feePayer)
 		signers = append(signers, payerAddr)
 		seen[feePayer] = true
 	}
@@ -131,11 +135,7 @@ func (t *Tx) GetFee() sdk.Coins {
 func (t *Tx) FeePayer() sdk.AccAddress {
 	feePayer := t.AuthInfo.Fee.Payer
 	if feePayer != "" {
-		payerAddr, err := sdk.AccAddressFromBech32(feePayer)
-		if err != nil {
-			panic(err)
-		}
-		return payerAddr
+		return sdk.MustAccAddressFromBech32(feePayer)
 	}
 	// use first signer as default if no payer specified
 	return t.GetSigners()[0]
@@ -144,11 +144,7 @@ func (t *Tx) FeePayer() sdk.AccAddress {
 func (t *Tx) FeeGranter() sdk.AccAddress {
 	feePayer := t.AuthInfo.Fee.Granter
 	if feePayer != "" {
-		granterAddr, err := sdk.AccAddressFromBech32(feePayer)
-		if err != nil {
-			panic(err)
-		}
-		return granterAddr
+		return sdk.MustAccAddressFromBech32(feePayer)
 	}
 	return nil
 }

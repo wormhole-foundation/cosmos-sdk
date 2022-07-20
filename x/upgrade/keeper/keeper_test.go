@@ -232,6 +232,45 @@ func (s *KeeperTestSuite) TestMigrations() {
 	s.Require().Equal(vmBefore["bank"]+1, vm["bank"])
 }
 
+func (s *KeeperTestSuite) TestLastCompletedUpgrade() {
+	keeper := s.app.UpgradeKeeper
+	require := s.Require()
+
+	s.T().Log("verify empty name if applied upgrades are empty")
+	name, height := keeper.GetLastCompletedUpgrade(s.ctx)
+	require.Equal("", name)
+	require.Equal(int64(0), height)
+
+	keeper.SetUpgradeHandler("test-v0.9", func(_ sdk.Context, _ types.Plan, vm module.VersionMap) (module.VersionMap, error) {
+		return vm, nil
+	})
+
+	keeper.ApplyUpgrade(s.ctx, types.Plan{
+		Name:   "test-v0.9",
+		Height: 10,
+	})
+
+	s.T().Log("verify valid upgrade name and height")
+	name, height = keeper.GetLastCompletedUpgrade(s.ctx)
+	require.Equal("test-v0.9", name)
+	require.Equal(int64(10), height)
+
+	keeper.SetUpgradeHandler("test-v0.10", func(_ sdk.Context, _ types.Plan, vm module.VersionMap) (module.VersionMap, error) {
+		return vm, nil
+	})
+
+	newCtx := s.ctx.WithBlockHeight(15)
+	keeper.ApplyUpgrade(newCtx, types.Plan{
+		Name:   "test-v0.10",
+		Height: 15,
+	})
+
+	s.T().Log("verify valid upgrade name and height with multiple upgrades")
+	name, height = keeper.GetLastCompletedUpgrade(newCtx)
+	require.Equal("test-v0.10", name)
+	require.Equal(int64(15), height)
+}
+
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
