@@ -1,3 +1,7 @@
+## Warning: this is a fork of the cosmos-sdk for the purposes of Wormhole.
+
+For our authored versions of cosmos-sdk, please see the `wormhole-chain-*` branches, which our releases are based on.
+
 <div align="center">
   <h1> Cosmos SDK </h1>
 </div>
