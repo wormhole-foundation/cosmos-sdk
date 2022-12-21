@@ -140,12 +140,12 @@ func PositiveDelegationInvariant(k Keeper) sdk.Invariant {
 
 				msg += fmt.Sprintf("\tdelegation with negative shares: %+v\n", delegation)
 			}
+			// TODO: turn this back on after all validators use self delegations
+			// if delegation.Shares.IsZero() {
+			// 	count++
 
-			if delegation.Shares.IsZero() {
-				count++
-
-				msg += fmt.Sprintf("\tdelegation with zero shares: %+v\n", delegation)
-			}
+			// 	msg += fmt.Sprintf("\tdelegation with zero shares: %+v\n", delegation)
+			// }
 		}
 
 		broken := count != 0
